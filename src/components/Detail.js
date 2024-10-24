@@ -2,24 +2,26 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import db from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const Detail = (props) => {
   const { id } = useParams();
   const [detailData, setDetailData] = useState({});
   useEffect(() => {
-    db.collection("movies")
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          setDetailData(doc.data());
-        } else {
-          console.log("No such document in firebase 🔥");
-        }
-      })
-      .catch((error) => {
-        console.log("Error getting document:", error);
-      });
+    const fetchMovieDetails = async () => {
+      const docRef = doc(db, "movies", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setDetailData(docSnap.data());
+      } else {
+        console.log("No such document in firebase!");
+      }
+    };
+
+    fetchMovieDetails().catch((error) => {
+      console.log("Error getting document:", error);
+    });
   }, [id]);
 
   return (
